@@ -7,6 +7,8 @@ Includes
 
 * integration-test source set
 * fatJar support
+* app support
+* heroku support
 
 ##Usage
 Install [giter8][g8], then:
@@ -15,7 +17,6 @@ Install [giter8][g8], then:
 
 cd into your new project dir
 
-    chmod +x gradlew
     ./gradlew build
 
 ##Gradle Options
@@ -29,6 +30,11 @@ Then run
 ###FatJar
     ./gradlew build -PcreateFatJar=true
 
-You can also combine these switches.
+###App Support
+	./gradlew installApp
+	./build/install/[projectName]/bin/[projectName]
+
+###Heroku
+When you have an heroku account, then you could create a heroku app with your created project dir. After pushing your changes to heroku the app should run immediately. How does it work? There is a gradle task 'stage' which will call installApp. The output is used by foreman and the Procfile which is also located in your new project.
 
 [g8]: http://github.com/n8han/giter8#readme
