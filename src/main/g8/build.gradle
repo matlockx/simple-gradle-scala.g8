@@ -106,4 +106,12 @@ jar {
 // heroku support
 task stage(dependsOn: ['clean', 'installApp'])
 
+tasks.withType(ScalaCompile) {
+    scalaCompileOptions.useAnt = false
+    scalaCompileOptions.fork=true
+    configure(scalaCompileOptions.forkOptions) {
+        memoryMaximumSize = '1g'
+        jvmArgs = ['-XX:MaxPermSize=512m']
+    }
+}
 
