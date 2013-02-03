@@ -1,0 +1,109 @@
+apply plugin: 'scala'
+//apply plugin: 'war'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'application'
+
+version = "$version$"
+group = "$group$"
+
+def integrationTestSourceDir = 'src/integration-test/scala'
+def integrationTestResourceDir = 'src/integration-test/resources'
+project.ext.useIntegrationTests = project.hasProperty('integrationTest') && ['on', 'true'].contains(project.properties.integrationTest)
+mainClassName = "$group$.Main"
+applicationName = project.name
+
+project.ext {
+    scalaVersion = "2.10.0"
+    scalaDependencyVersion = "2.10"
+    akkaScalaVersion = "_2.10"
+    
+    akkaVersion = "2.1.0"
+}
+
+repositories {
+    mavenCentral()
+    maven { url "http://repo.typesafe.com/typesafe/releases/"}
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/"}
+    maven { url "https://oss.sonatype.org/content/repositories/releases/"}
+    
+}
+
+dependencies {
+    scalaTools "org.scala-lang:scala-compiler:${scalaVersion}"
+
+    compile "org.scala-lang:scala-library:${scalaVersion}"
+    compile "joda-time:joda-time:2.1"
+    compile "org.joda:joda-convert:1.2"
+
+    compile "com.typesafe.akka:akka-slf4j${akkaScalaVersion}:${akkaVersion}"
+    compile "com.typesafe.akka:akka-actor${akkaScalaVersion}:${akkaVersion}"
+    compile "com.typesafe.akka:akka-testkit${akkaScalaVersion}:${akkaVersion}"
+    compile "ch.qos.logback:logback-classic:1.0.7"
+
+    testCompile "org.scalatest:scalatest_${scalaVersion}:1.8"
+
+    testCompile "junit:junit:4.+"
+}
+configurations.all {
+    resolutionStrategy {
+        cacheChangingModulesFor 1, 'MINUTES' // for snapshots
+        cacheDynamicVersionsFor 1, 'MINUTES' // for releases
+        //failOnVersionConflict()
+        
+    
+    }
+}
+configurations {
+    integrationTestCompile { extendsFrom testCompile }
+    integrationTestRuntime { extendsFrom integrationTestCompile, testRuntime }
+}
+sourceSets {
+    integrationTest {
+        scala.srcDir file(integrationTestSourceDir)
+        resources.srcDir file(integrationTestResourceDir)
+        compileClasspath = sourceSets.main.output + sourceSets.test.output + configurations.integrationTestCompile
+        runtimeClasspath = output + compileClasspath + configurations.integrationTestRuntime
+    }
+}
+test {
+    if (project.ext.useIntegrationTests) {
+
+        maxParallelForks = 1
+        sourceSets.test.scala.srcDirs += integrationTestSourceDir
+        sourceSets.test.resources.srcDirs += integrationTestResourceDir
+    }
+    //makes the standard streams (err and out) visible at console when running tests
+    testLogging.showStandardStreams = true
+
+    //tweaking memory settings for the forked vm that runs tests
+    jvmArgs '-Xmx1024m', '-XX:MaxPermSize=1024m'
+
+    //listening to test execution events
+    beforeTest { descriptor ->
+        logger.lifecycle("Running: " + descriptor)
+    }
+    onOutput { descriptor, event ->
+        logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message )
+    }
+}
+
+
+task wrapper(type: Wrapper) {  gradleVersion = '1.4' }
+
+jar {
+    ext.buildFatJar = project.hasProperty('fatJar') ? project.properties.fatJar : false
+    if (ext.buildFatJar){
+        from (configurations.runtime.resolve().collect { it.isDirectory() ? it : zipTree(it) }) {
+            exclude 'META-INF/MANIFEST.MF'
+            exclude 'META-INF/*.SF'
+            exclude 'META-INF/*.DSA'
+            exclude 'META-INF/*.RSA'
+        }
+    }
+    manifest { attributes("Main-Class": mainClassName ) }
+}
+// heroku support
+task stage(dependsOn: ['clean', 'installApp'])
+
+
