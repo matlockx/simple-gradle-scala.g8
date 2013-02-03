@@ -41,7 +41,7 @@ dependencies {
     compile "com.typesafe.akka:akka-testkit\${akkaScalaVersion}:\${akkaVersion}"
     compile "ch.qos.logback:logback-classic:1.0.7"
 
-    testCompile "org.scalatest:scalatest_${scalaVersion}:1.8"
+    testCompile "org.scalatest:scalatest_\${scalaVersion}:1.8"
 
     testCompile "junit:junit:4.+"
 }
