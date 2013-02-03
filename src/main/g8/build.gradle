@@ -30,15 +30,15 @@ repositories {
 }
 
 dependencies {
-    scalaTools "org.scala-lang:scala-compiler:${scalaVersion}"
+    scalaTools "org.scala-lang:scala-compiler:\${scalaVersion}"
 
-    compile "org.scala-lang:scala-library:${scalaVersion}"
+    compile "org.scala-lang:scala-library:\${scalaVersion}"
     compile "joda-time:joda-time:2.1"
     compile "org.joda:joda-convert:1.2"
 
-    compile "com.typesafe.akka:akka-slf4j${akkaScalaVersion}:${akkaVersion}"
-    compile "com.typesafe.akka:akka-actor${akkaScalaVersion}:${akkaVersion}"
-    compile "com.typesafe.akka:akka-testkit${akkaScalaVersion}:${akkaVersion}"
+    compile "com.typesafe.akka:akka-slf4j\${akkaScalaVersion}:\${akkaVersion}"
+    compile "com.typesafe.akka:akka-actor\${akkaScalaVersion}:\${akkaVersion}"
+    compile "com.typesafe.akka:akka-testkit\${akkaScalaVersion}:\${akkaVersion}"
     compile "ch.qos.logback:logback-classic:1.0.7"
 
     testCompile "org.scalatest:scalatest_${scalaVersion}:1.8"
@@ -89,7 +89,7 @@ test {
 }
 
 
-task wrapper(type: Wrapper) {  gradleVersion = '1.4' }
+task wrapper(type: Wrapper) {  gradleVersion = "$gradle_version$" }
 
 jar {
     ext.buildFatJar = project.hasProperty('fatJar') ? project.properties.fatJar : false
